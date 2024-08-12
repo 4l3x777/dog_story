@@ -1,0 +1,7 @@
+[requires]
+libpqxx/7.9.1
+boost/1.85.0
+catch2/3.6.0
+
+[generators]
+cmake_multi
