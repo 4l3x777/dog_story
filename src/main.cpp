@@ -64,9 +64,9 @@ void RunWorkers(unsigned workers_count, const Fn& fn) {
         ("www-root,w", po::value(&args.www_root)->value_name("dir"s), "resource root directory path")
         // Параметр --randomize-spawn-points включает режим, при котором пёс игрока появляется в случайной точке случайно выбранной дороги карты.
         ("randomize-spawn-points", "random dog spawn position")
-        // get file name to save serialization file
+        // Параметр --state-file задает имя файла для сохранения в нем состояния игры.
         ("state-file", po::value(&args.save_file)->value_name("file"s), "save state file path")
-        // get period to save serialization
+        // Параметр --save-state-period задает с какой переодичностью проводить сохранение состояния игры
         ("save-state-period", po::value(&period_serialization)->value_name("milliseconds"s), "set save period (serialization)");
     
     // variables_map хранит значения опций после разбора
@@ -183,7 +183,7 @@ int main(int argc, const char* argv[]) {
                                                         }
         );
 
-        // Настраиваем вызов метода Application::RetirePlayers каждые delta миллисекунд внутри strand
+        // Настраиваем вызов метода Application::RetirePlayers каждые delta миллисекунд внутри api_strand
         auto ticker_retire = std::make_shared<ticker::Ticker>(
             api_strand, 
             args.tick_time,
@@ -201,8 +201,9 @@ int main(int argc, const char* argv[]) {
                 std::forward<decltype(send)>(send), 
                 socket);
         });
-        // 8. Запустить ticker
+        // 8. Запустить ticker и ticker_retire
         ticker->Start();
+        ticker_retire->Start();
 
         // 9. Эта надпись сообщает тестам о том, что сервер запущен и готов обрабатывать запросы
         LOG_MSG().server_start(address.to_string(), port);
